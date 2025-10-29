@@ -1,5 +1,6 @@
 # Bigdata_Apache_Spark
 Procesamiento de datos con apache spark
+______________________________________________________________________________________________________________
 
 Conjunto de Datos
 
@@ -13,125 +14,59 @@ Conjunto de Datos
 
 •	Cobertura geográfica: Abarca países a nivel mundial
 
+_______________________________________________________________________________________________________________
 
+Pasos sencillos para realizar el anexo (Spark Streaming + Kafka)
 
-Pasos para ejecutar dataset
+1.	Entrar a la máquina virtual
 
+o	Abrir PuTTY
+o	Conectarse por SSH usando la IP local
+o	Usuario: vboxuser
+o	Password: bigdata
 
-1) Conectarse a la máquina virtual
-
-Abrir PuTTY → conectar vía SSH con la IP de la VM
-
-Usuario: vboxuser
-
-Password: bigdata
-
-
-2) Descargar y preparar el dataset COVID
-
-Descargamos la dataset directamente por link https://www.kaggle.com/datasets/imdevskp/corona-virus-report?resource=download
-
-Identificar el archivo que usaremos, por ejemplo:
-
-country_wise_latest.csv
-
-
-3) Subir el dataset COVID a HDFS (como en Anexo 2)
-
-Cambiar a usuario hadoop:
-
-su - hadoop
-
-Password: hadoop
-
-Crear carpeta en HDFS:
-
-hdfs dfs -mkdir /CovidDataset
-
-Subir el archivo:
-
-hdfs dfs -put /home/hadoop/country_wise_latest.csv /CovidDataset
-
-Verificar:
-
-hdfs dfs -ls /CovidDataset
-
-
-4) Ver/usar el dataset en Spark (validación previa)
-
-Volver a usuario vboxuser (si sales de sesión)
-
-pyspark
-
-Dentro de Spark:
-
-df = spark.read.csv("hdfs://localhost:9000/CovidDataset/country_wise_latest.csv", header=True, inferSchema=True)
-
-df.show(5)
-
-df.printSchema()
-
-Salir de pyspark con CTRL+D
-
-
-5) Instalar y preparar Kafka (si no se había hecho antes)
+2.	Instalar librería de Kafka para Python
 
 pip install kafka-python
 
+3.	Descargar e instalar Kafka
+
 wget https://downloads.apache.org/kafka/3.6.2/kafka_2.13-3.6.2.tgz
-
 tar -xzf kafka_2.13-3.6.2.tgz
-
 sudo mv kafka_2.13-3.6.2 /opt/Kafka
 
+4.	Iniciar los servicios
 
-6) Iniciar servicios Kafka y ZooKeeper
+o	Iniciar ZooKeeper:
+o	sudo /opt/Kafka/bin/zookeeper-server-start.sh /opt/Kafka/config/zookeeper.properties &
+o	Iniciar Kafka:
+o	sudo /opt/Kafka/bin/kafka-server-start.sh /opt/Kafka/config/server.properties &
 
-sudo /opt/Kafka/bin/zookeeper-server-start.sh /opt/Kafka/config/zookeeper.properties &
-sudo /opt/Kafka/bin/kafka-server-start.sh /opt/Kafka/config/server.properties &
+5.	Crear un tópico en Kafka
 
+/opt/Kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic sensor_data
 
-7) Crear el tópico Kafka (para mandar datos COVID)
+6.	Crear y ejecutar el productor (Kafka Producer)
 
-/opt/Kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic covid_data
+o	Crear archivo:
+o	nano kafka_producer_covid.py
+o	Pegar el código del productor (el del PDF)
+o	Guardar y ejecutar:
+o	python3 kafka_producer_covid.py
 
+7.	Crear y ejecutar el consumidor (Spark Streaming)
+o	Abrir una nueva terminal PuTTY (sin cerrar la del productor)
+o	Crear archivo:
+o	nano spark_streaming_covid.py
+o	Pegar el código del consumidor
+o	Ejecutar con spark-submit:
+o	spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3 spark_streaming_covid.py
 
-8) Crear Producer en Python para enviar datos del CSV a Kafka
+8.	Observar resultados
+o	Ver datos llegando en consola
+o	Opcional: abrir interfaz Web de Spark
+o	http://IP-DE-LA-VM:4040
 
-nano covid_producer.py
+9.	Para finalizar
 
-(luego se llenará el código, no lo pongo ahora porque solo pediste pasos)
-
-Guardar y ejecutar más tarde.
-
-
-9) Crear Consumer con Spark Streaming (lectura del topic)
-
-nano spark_covid_consumer.py
-
-(luego se llenará el código de consumo)
-
-
-10) Ejecutar
-
-Primero ejecutar el producer:
-
-python3 covid_producer.py
-
-Luego el consumer:
-
-spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3 spark_covid_consumer.py
-
-
-11) Monitoreo
-
-Abrir en navegador:
-
-http://IP_VM:4040    ← Spark UI
-
-
-12) Finalizar
-
-CTRL + C en ambas terminales
-
-Cerrar PuTTY
+o	Presionar CTRL + C en ambas terminales para detener productor y consumidor
