@@ -1,38 +1,54 @@
 # Bigdata_Apache_Spark
 Procesamiento de datos con apache spark
-______________________________________________________________________________________________________________
 
-Conjunto de Datos
+Pasos para ejecutar codigo (Spark Streaming + Kafka)
 
-•	Fuente: kaggle
+Realizar el cargue del dataset en la herramienta Hadoop.
 
-•	URL: https://www.kaggle.com/datasets/imdevskp/corona-virus-report?resource=download
+----------------------------------------------
+1.	Ingresamos con las siguientes credenciales 
+----------------------------------------------
 
-•	Nombre del dataset: country_wise_latest
+Usuario: hadoop 
 
-•	Formato: CSV
+Password: hadoop 
 
-•	Cobertura geográfica: Abarca países a nivel mundial
+Iniciamos el clúster de Hadoop con el siguiente comando 
 
-_______________________________________________________________________________________________________________
+start-all.sh
 
-Pasos sencillos para realizar el anexo (Spark Streaming + Kafka)
+------------------------------------------------------------------
+2.	Se crea una carpeta en el sistema HDFS utilizando el comando 
+------------------------------------------------------------------
 
-1.	Entrar a la máquina virtual
+hdfs dfs -mkdir /Covid19
 
-o	Abrir PuTTY
+----------------------------------------------------------------------
+3.	En la máquina virtual descargamos el dataset, del siguiente link
+----------------------------------------------------------------------
 
-o	Conectarse por SSH usando la IP local
+https://www.kaggle.com/datasets/imdevskp/corona-virus-report?resource=download
 
-o	Usuario: vboxuser
+---------------------------------------------------------------------------------------
+4.	Una vez con el dataset descargado, entramos a la máquina virtual seguimos los pasos
+---------------------------------------------------------------------------------------
+Abrir PuTTY
 
-o	Password: bigdata
+Conectarse por SSH usando la IP local
 
-2.	Instalar librería de Kafka para Python
+Usuario: vboxuser
+
+Password: bigdata
+
+--------------------------------------------
+5.	Instalar librería de Kafka para Python
+--------------------------------------------
 
 pip install kafka-python
 
-3.	Descargar e instalar Kafka
+-------------------------------------
+6.	Descargar e instalar Kafka
+-------------------------------------
 
 wget https://downloads.apache.org/kafka/3.6.2/kafka_2.13-3.6.2.tgz
 
@@ -40,54 +56,64 @@ tar -xzf kafka_2.13-3.6.2.tgz
 
 sudo mv kafka_2.13-3.6.2 /opt/Kafka
 
-4.	Iniciar los servicios
+---------------------------
+7.	Iniciar los servicios
+---------------------------
 
-o	Iniciar ZooKeeper:
+Iniciar ZooKeeper:
 
-o	sudo /opt/Kafka/bin/zookeeper-server-start.sh /opt/Kafka/config/zookeeper.properties &
+sudo /opt/Kafka/bin/zookeeper-server-start.sh /opt/Kafka/config/zookeeper.properties &
 
-o	Iniciar Kafka:
+Ahora puedes iniciar Kafka:
 
-o	sudo /opt/Kafka/bin/kafka-server-start.sh /opt/Kafka/config/server.properties &
+sudo /opt/Kafka/bin/kafka-server-start.sh /opt/Kafka/config/server.properties &
 
-5.	Crear un tópico en Kafka
+-----------------------------
+8.	Crear un tópico en Kafka
+-----------------------------
 
-/opt/Kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic sensor_data
+/opt/Kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic covid_data
 
-6.	Crear y ejecutar el productor (Kafka Producer)
+--------------------------------------------------
+9.	Crear y ejecutar el productor (Kafka Producer)
+--------------------------------------------------
 
-o	Crear archivo:
+Crear archivo:
 
-o	nano kafka_producer_covid.py
+Pegar el código del productor (el del PDF)
 
-o	Pegar el código del productor adjunto
+Guardar y ejecutar:
 
-o	Guardar y ejecutar:
+python3 kafka_producer_covid.py
 
-o	python3 kafka_producer_covid.py
+-----------------------------------------------------
+10.	Crear y ejecutar el consumidor (Spark Streaming)
+-----------------------------------------------------
 
-7.	Crear y ejecutar el consumidor (Spark Streaming)
+Abrir una nueva terminal PuTTY (sin cerrar la del productor)
 
-o	Abrir una nueva terminal PuTTY (sin cerrar la del productor)
+Crear archivo:
 
-o	Crear archivo:
+nano spark_streaming_covid.py
 
-o	nano spark_streaming_covid.py
+Pegar el código del consumidor
 
-o	Pegar el código del consumidor adjunto
+Ejecutar con spark-submit:
 
-o	Ejecutar con spark-submit:
+spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 spark_streaming_covid.py
 
-o	spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3 spark_streaming_covid.py
+----------------------------
+11.	Observar resultados
+----------------------------
 
-8.	Observar resultados
+Ver datos llegando en consola
 
-o	Ver datos llegando en consola
+Opcional: abrir interfaz Web de Spark
 
-o	Opcional: abrir interfaz Web de Spark
+http://IP-DE-LA-VM:4040
 
-o	http://IP-DE-LA-VM:4040
+---------------------
+12.	Para finalizar
+---------------------
 
-9.	Para finalizar
-
-o	Presionar CTRL + C en ambas terminales para detener productor y consumidor
+Presionar CTRL + C en ambas terminales para detener productor y consumidor

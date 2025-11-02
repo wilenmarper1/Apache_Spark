@@ -22,5 +22,5 @@ while True:
     }
 
     producer.send('covid_data', value=data)
-    print(f"📤 Enviado: {data}")
+    print(f"Enviado: {data}")
     time.sleep(2)
